@@ -1,5 +1,7 @@
 package com.grudus.adventofcode.day01
 
+import com.grudus.adventofcode.day01.Day01.firstStar
+import com.grudus.adventofcode.day01.Day01.secondStar
 import com.grudus.adventofcode.readDayInput
 
 object Day01 {
