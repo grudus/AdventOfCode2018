@@ -1,17 +1,17 @@
 package com.grudus.adventofcode.day05
 
-import com.grudus.adventofcode.day05.Day05.firstStar
-import com.grudus.adventofcode.day05.Day05.secondStar
+import com.grudus.adventofcode.day05.AlchemicalReduction.firstStar
+import com.grudus.adventofcode.day05.AlchemicalReduction.secondStar
 import com.grudus.adventofcode.readDayInput
 import kotlin.streams.toList
 
-object Day05 {
+object AlchemicalReduction {
     private const val DIFF_BETWEEN_CAPITAL_LETTER = 32
 
     fun firstStar(initialPolymer: String) = startReactions(initialPolymer).length
 
     fun secondStar(initialPolymer: String) = ('a'..'z')
-        .map { char -> initialPolymer.replace(Regex("[$char${char - DIFF_BETWEEN_CAPITAL_LETTER}]"), "") }
+        .map { char -> initialPolymer.replace(Regex("[$char${char.toUpperCase()}]"), "") }
         .parallelStream()
         .map { polymer -> startReactions(polymer) }
         .map { it.length }

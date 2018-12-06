@@ -1,11 +1,11 @@
 package com.grudus.adventofcode.day02
 
-import com.grudus.adventofcode.day02.Day02.firstStar
-import com.grudus.adventofcode.day02.Day02.secondStar
+import com.grudus.adventofcode.day02.InventoryManagementSystem.firstStar
+import com.grudus.adventofcode.day02.InventoryManagementSystem.secondStar
 import com.grudus.adventofcode.readDayInput
 
 
-object Day02 {
+object InventoryManagementSystem {
 
     fun firstStar(input: List<String>) =
         input

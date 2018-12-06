@@ -1,15 +1,13 @@
 package com.grudus.adventofcode.day01
 
-import com.grudus.adventofcode.day01.Day01.firstStar
-import com.grudus.adventofcode.day01.Day01.secondStar
+import com.grudus.adventofcode.day01.ChronalCalibration.firstStar
+import com.grudus.adventofcode.day01.ChronalCalibration.secondStar
 import com.grudus.adventofcode.readDayInput
 
-object Day01 {
-
+object ChronalCalibration {
 
     fun firstStar(input: List<String>) =
         input.sumBy { it.toInt() }
-
 
     fun secondStar(input: List<String>): Int {
         val frequencies = mutableSetOf(0)
@@ -25,17 +23,15 @@ object Day01 {
                 if (!newItem)
                     return currentFrequency
             }
-
         }
     }
-
 }
 
 
 fun main(args: Array<String>) {
     val file = readDayInput("01")
 
-    println(Day01.firstStar(file))
-    println(Day01.secondStar(file))
+    println(firstStar(file))
+    println(secondStar(file))
 
 }
