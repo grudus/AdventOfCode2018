@@ -10,15 +10,15 @@ object TheSumOfItsParts {
 
     data class Instruction(val step: String, val stepAfter: String)
 
-    class Node<T : Comparable<T>>(private val value: T) {
+    class Node<T : Comparable<T>>(val value: T, val isVisited: Boolean = false) {
         private val parents = mutableListOf<Node<T>>()
         private val children = mutableListOf<Node<T>>()
 
-        private var visited = false
+        private var visited = isVisited
 
         override fun toString() = value.toString()
 
-        fun setVisited() {
+        fun markAsVisited() {
             visited = true
         }
 
@@ -31,48 +31,36 @@ object TheSumOfItsParts {
         }
 
         fun isRoot() = parents.isEmpty()
-        fun isLeaf() = children.isEmpty()
+        private fun isLeaf() = children.isEmpty()
 
-        fun allVisited(): Boolean {
-            if (isLeaf())
-                return visited
-            return children.all { it.allVisited() }
-        }
-
-        fun visitVal(value: T) {
-            if (this.value == value)
-                visited = true
-            else
-                children.forEach { it.visitVal(value) }
-        }
+        fun allVisited(): Boolean =
+            if (isLeaf()) visited
+            else children.all { it.allVisited() }
 
 
-        fun visit(toVisit: List<T>): List<T> {
-            return if (visited) {
+        fun visit(toVisit: List<Node<T>> = emptyList()): List<Node<T>> =
+            if (visited) {
                 children.flatMap { it.visit(toVisit) }
             } else {
                 if (parents.all { it.visited })
-                    toVisit + value
+                    toVisit + this
                 else
                     toVisit
             }
-
-        }
     }
 
 
     fun firstStar(input: List<String>): String {
         val tree = createTree(input)
 
-        val order = mutableListOf<String>()
-
-        while (!tree.allVisited()) {
-            val x = tree.visit(emptyList())
-            val min = x.min()!!
-            tree.visitVal(min)
-            order += min
-        }
-        return order.joinToString("")
+        return generateSequence { 0 }
+            .takeWhile { !tree.allVisited() }
+            .fold("") { order, _ ->
+                val notVisitedNodes = tree.visit()
+                val nodeToVisit = notVisitedNodes.minBy { it.value }!!
+                nodeToVisit.markAsVisited()
+                order + nodeToVisit.value
+            }
     }
 
 
@@ -93,8 +81,7 @@ object TheSumOfItsParts {
         }
 
         val possibleRoots = nodes.values.filter { it.isRoot() }
-        val root = Node("0")
-        root.setVisited()
+        val root = Node("0", isVisited = true)
 
         possibleRoots.forEach {
             it.addParent(root)
