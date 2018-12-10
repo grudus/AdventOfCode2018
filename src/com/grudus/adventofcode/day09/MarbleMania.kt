@@ -5,59 +5,6 @@ import com.grudus.adventofcode.readDayInput
 
 object MarbleMania {
 
-    data class Snapshot(val currentMarbleIndex: Int, val points: Map<Int, Int>, val marbles: List<Int>) {
-
-        fun insertMarbleAfter(index1: Int, marble: Int) =
-            marbles.subList(0, index1) + marble + marbles.subList(index1, marbles.size)
-
-    }
-
-    data class Move(val currentPlayer: Int, val marbleNumber: Int)
-
-    fun firstStar(input: MetaInfo): Int {
-        val points = (0 until input.numberOfPlayers).groupBy({ it }, { 0 }).mapValues { it.value[0] }
-
-        return generateSequence(Move(3, 3)) {
-            Move((it.currentPlayer + 1) % input.numberOfPlayers, it.marbleNumber + 1)
-        }
-            .takeWhile { it.marbleNumber <= input.lastMarblePoint }
-            .fold(Snapshot(1, points, listOf(0, 2, 1))) { snapshot, (currentPlayer, marbleNumber) ->
-
-                if (marbleNumber % 23 == 0) {
-                    val marbleToRemoveIndex = (snapshot.currentMarbleIndex - 7)
-                        .let { if (it < 0) snapshot.marbles.size + it else it }
-                    val nextMarbles = snapshot.marbles - snapshot.marbles[marbleToRemoveIndex]
-
-
-                    val newPoints =
-                        snapshot.points[currentPlayer]!! + marbleNumber + snapshot.marbles[marbleToRemoveIndex]
-
-                    return@fold snapshot.copy(
-                        currentMarbleIndex = marbleToRemoveIndex,
-                        marbles = nextMarbles,
-                        points = snapshot.points + (currentPlayer to newPoints)
-                    )
-                }
-
-                val nextMarbleIndex = (snapshot.currentMarbleIndex + 2) % snapshot.marbles.size
-
-                if (nextMarbleIndex == 0)
-                    return@fold snapshot.copy(
-                        currentMarbleIndex = snapshot.marbles.size,
-                        marbles = snapshot.marbles + marbleNumber
-                    )
-
-                return@fold snapshot.copy(
-                    currentMarbleIndex = nextMarbleIndex,
-                    marbles = snapshot.insertMarbleAfter(nextMarbleIndex, marbleNumber)
-                )
-
-
-            }.points.maxBy { it.value }!!.value
-    }
-
-
-
     class Node<T>(val value: T) {
         var next: Node<T>? = null
         var previous: Node<T>? = null
@@ -97,8 +44,10 @@ object MarbleMania {
         }
     }
 
-    fun secondStar(input: MetaInfo): Long {
-        val points: MutableMap<Int, Long> = (0 until input.numberOfPlayers).groupBy({ it }, { 0 }).mapValues { it.value[0].toLong() } as MutableMap
+    fun allStars(input: MetaInfo): Long {
+        val points: MutableMap<Int, Long> = (0 until input.numberOfPlayers)
+            .groupBy({ it }, { 0 })
+            .mapValues { it.value[0].toLong() } as MutableMap
 
         var currentMarble = Node.createCircular(0L, 1L)
         var marbleNumber = 2L
@@ -139,6 +88,6 @@ fun main(args: Array<String>) {
         .map { groups -> MetaInfo(groups[0].toInt(), groups[1].toInt()) }
         .first()
 
-    println(MarbleMania.firstStar(info))
-    println(MarbleMania.secondStar(info.copy(lastMarblePoint = info.lastMarblePoint * 100)))
+    println(MarbleMania.allStars(info))
+    println(MarbleMania.allStars(info.copy(lastMarblePoint = info.lastMarblePoint * 100)))
 }
