@@ -86,25 +86,26 @@ object MarbleMania {
             prev!!.next = next
             return next
         }
+
+        companion object {
+            fun <T> createCircular(value1: T, value2: T): Node<T> {
+                val node: Node<T> = Node(value1).addNext(value2)
+                node.next = node.previous
+                node.previous!!.previous = node
+                return node
+            }
+        }
     }
 
     fun secondStar(input: MetaInfo): Long {
         val points: MutableMap<Int, Long> = (0 until input.numberOfPlayers).groupBy({ it }, { 0 }).mapValues { it.value[0].toLong() } as MutableMap
 
-        val first = Node(0L)
-        val marbles = first.addNext(2L).addNext(1L)
-        marbles.next = first
-        first.previous = marbles
-
-        var currentMarble: Node<Long> = marbles.previous!!
-
-        var marbleNumber = 3L
-        var currentPlayer = 3
+        var currentMarble = Node.createCircular(0L, 1L)
+        var marbleNumber = 2L
+        var currentPlayer = 2
 
         while (marbleNumber <= input.lastMarblePoint) {
-
             if (marbleNumber % 23 == 0L) {
-
                 val marbleToRemove = (0 until 7).fold(currentMarble) { a, _ -> a.previous!! }
                 val marbleToRemovePoints = marbleToRemove.value
 
@@ -112,24 +113,19 @@ object MarbleMania {
                     points[currentPlayer]!! + marbleNumber + marbleToRemovePoints
 
                 points[currentPlayer] = newPoints
-
                 currentMarble = marbleToRemove.removeItself()
             }
 
             else {
                 val nextMarbleAfter = currentMarble.next!!
-
                 currentMarble = nextMarbleAfter.addNext(marbleNumber)
             }
-
 
             ++marbleNumber
             currentPlayer = (currentPlayer + 1) % input.numberOfPlayers
         }
-
         return points.maxBy { it.value }!!.value
     }
-
 }
 
 data class MetaInfo(val numberOfPlayers: Int, val lastMarblePoint: Int)
