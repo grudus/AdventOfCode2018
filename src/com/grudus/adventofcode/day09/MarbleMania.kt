@@ -38,7 +38,7 @@ object MarbleMania {
                         points = snapshot.points + (currentPlayer to newPoints)
                     )
                 }
-                
+
                 val nextMarbleIndex = (snapshot.currentMarbleIndex + 2) % snapshot.marbles.size
 
                 if (nextMarbleIndex == 0)
@@ -56,6 +56,80 @@ object MarbleMania {
             }.points.maxBy { it.value }!!.value
     }
 
+    
+
+    class Node<T>(val value: T) {
+        var next: Node<T>? = null
+        var previous: Node<T>? = null
+
+        fun addNext(value: T): Node<T> {
+            val newNode = Node(value)
+            if (this.next == null) {
+                this.next = newNode
+                newNode.previous = this
+            } else {
+                val previousNext = this.next
+
+                this.next = newNode
+                newNode.previous = this
+
+                newNode.next = previousNext
+                previousNext!!.previous = newNode
+            }
+            return this.next!!
+        }
+
+        fun removeItself(): Node<T> {
+            val prev = this.previous
+            val next = this.next
+            next!!.previous = prev
+            prev!!.next = next
+            return next
+        }
+    }
+
+    fun secondStar(input: MetaInfo): Long {
+        val points: MutableMap<Int, Long> = (0 until input.numberOfPlayers).groupBy({ it }, { 0 }).mapValues { it.value[0].toLong() } as MutableMap
+
+        val first = Node(0L)
+        val marbles = first.addNext(2L).addNext(1L)
+        marbles.next = first
+        first.previous = marbles
+
+        var currentMarble: Node<Long> = marbles.previous!!
+
+        var marbleNumber = 3L
+        var currentPlayer = 3
+
+        while (marbleNumber <= input.lastMarblePoint) {
+
+            if (marbleNumber % 23 == 0L) {
+
+                val marbleToRemove = (0 until 7).fold(currentMarble) { a, _ -> a.previous!! }
+                val marbleToRemovePoints = marbleToRemove.value
+
+                val newPoints =
+                    points[currentPlayer]!! + marbleNumber + marbleToRemovePoints
+
+                points[currentPlayer] = newPoints
+
+                currentMarble = marbleToRemove.removeItself()
+            }
+
+            else {
+                val nextMarbleAfter = currentMarble.next!!
+
+                currentMarble = nextMarbleAfter.addNext(marbleNumber)
+            }
+
+
+            ++marbleNumber
+            currentPlayer = (currentPlayer + 1) % input.numberOfPlayers
+        }
+
+        return points.maxBy { it.value }!!.value
+    }
+
 }
 
 data class MetaInfo(val numberOfPlayers: Int, val lastMarblePoint: Int)
@@ -70,4 +144,5 @@ fun main(args: Array<String>) {
         .first()
 
     println(MarbleMania.firstStar(info))
+    println(MarbleMania.secondStar(info.copy(lastMarblePoint = info.lastMarblePoint * 100)))
 }
