@@ -56,7 +56,7 @@ object MarbleMania {
             }.points.maxBy { it.value }!!.value
     }
 
-    
+
 
     class Node<T>(val value: T) {
         var next: Node<T>? = null
