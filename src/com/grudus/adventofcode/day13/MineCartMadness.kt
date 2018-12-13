@@ -1,10 +1,7 @@
 package com.grudus.adventofcode.day13
 
-import com.grudus.adventofcode.day13.MineCartMadness.Direction.DOWN
-import com.grudus.adventofcode.day13.MineCartMadness.Direction.UP
 import com.grudus.adventofcode.day13.MineCartMadness.TurnOption.*
 import com.grudus.adventofcode.readDayInput
-import javafx.geometry.Pos
 
 object MineCartMadness {
     enum class Direction(val dx: Int, val dy: Int, val visualisation: Char) {
@@ -32,12 +29,16 @@ object MineCartMadness {
     }
 
     data class Cart(
-        var currentPosition: Position,
+        val id: Int,
+        val currentPosition: Position,
         val direction: Direction,
         val previousTurnOption: TurnOption = RIGHT
     ) {
         fun defaultNextCard(): Cart = copy(currentPosition = nextPosition())
         fun nextPosition(): Position = currentPosition + direction
+
+        override fun equals(other: Any?) = (other as Cart).id == id
+        override fun hashCode() = id.hashCode()
     }
 
 
@@ -87,7 +88,7 @@ object MineCartMadness {
 
     fun firstStar(input: List<String>): Position {
         val trackSystem: Map<Position, Track> = createTrackSystem(input)
-        var cards: MutableList<Cart> = findCards(input) as MutableList<Cart>
+        val cards: MutableList<Cart> = findCards(input) as MutableList<Cart>
 
         val isCollision: (Position) -> Boolean = { pos -> cards.any { it.currentPosition == pos } }
 
@@ -109,6 +110,42 @@ object MineCartMadness {
 
     }
 
+    fun secondStar(input: List<String>): Position {
+        val trackSystem: Map<Position, Track> = createTrackSystem(input)
+        val carts: MutableList<Cart> = findCards(input) as MutableList<Cart>
+        val cartsToRemove = mutableListOf<Cart>()
+
+        val cartWithCollision: (Position) -> Cart? = { pos -> carts.find { it.currentPosition == pos } }
+
+        while (true) {
+            carts.sortWith(compareBy({ it.currentPosition.y }, { it.currentPosition.x }))
+
+            for (i in 0 until carts.size) {
+                val nextPosition: Position = carts[i].nextPosition()
+
+                val collisionCart = cartWithCollision(nextPosition)
+
+                if (collisionCart != null) {
+                    cartsToRemove += carts[i]
+                    cartsToRemove += collisionCart
+                    continue
+                }
+
+                val track = trackSystem[nextPosition]
+                val nextPosition1 = track!!.nextPosition(carts[i])
+                carts[i] = nextPosition1
+            }
+
+            carts.removeAll(cartsToRemove)
+            cartsToRemove.removeAll { true }
+
+            if (carts.size == 1)
+                return carts[0].currentPosition
+
+        }
+
+    }
+
 
     private fun findCards(input: List<String>): List<Cart> =
         input.mapIndexed { y, mapRow ->
@@ -121,7 +158,8 @@ object MineCartMadness {
         }.flatten()
             .filter { it != null }
             .filter { pair -> Track.fromVisualisation(pair!!.second) == null }
-            .map { pair -> Cart(pair!!.first, Direction.fromVisualisation(pair.second)) }
+            .mapIndexed { i, pair -> Cart(i, pair!!.first, Direction.fromVisualisation(pair.second)) }
+
 
     private fun createTrackSystem(input: List<String>): Map<Position, Track> =
         input.mapIndexed { y, mapRow ->
@@ -147,6 +185,7 @@ fun main(args: Array<String>) {
     val input = readDayInput("13")
 
     println(MineCartMadness.firstStar(input))
+    println(MineCartMadness.secondStar(input))
 
 
 }
