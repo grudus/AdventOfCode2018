@@ -2,37 +2,37 @@ package com.grudus.adventofcode.day14
 
 object ChocolateCharts {
 
-    fun firstStar(numberOfRecipies: Int): String {
-        val recipies = mutableListOf(3, 7)
+    fun firstStar(numberOfRecipes: Int): String {
+        val recipes = mutableListOf(3, 7)
 
         var elf1Index = 0
         var elf2Index = 1
 
-        while (recipies.size < numberOfRecipies + 10) {
-            recipies += (recipies[elf1Index] + recipies[elf2Index]).toString().map(Character::getNumericValue)
+        while (recipes.size < numberOfRecipes + 10) {
+            recipes += (recipes[elf1Index] + recipes[elf2Index]).toString().map(Character::getNumericValue)
 
-            elf1Index = (elf1Index + recipies[elf1Index] + 1) % recipies.size
-            elf2Index = (elf2Index + recipies[elf2Index] + 1) % recipies.size
+            elf1Index = (elf1Index + recipes[elf1Index] + 1) % recipes.size
+            elf2Index = (elf2Index + recipes[elf2Index] + 1) % recipes.size
         }
 
-        return recipies.drop(numberOfRecipies).take(10).joinToString("")
+        return recipes.drop(numberOfRecipes).take(10).joinToString("")
     }
 
 
     fun secondStar(searchedSubsequence: String): Int {
-        val recipies = mutableListOf(3, 7)
+        val recipes = mutableListOf(3, 7)
 
         var elf1Index = 0
         var elf2Index = 1
 
-        while (searchedSubsequence !in recipies.takeLast(11).joinToString("")) {
-            recipies += (recipies[elf1Index] + recipies[elf2Index]).toString().map(Character::getNumericValue)
+        while (searchedSubsequence !in recipes.takeLast(11).joinToString("")) {
+            recipes += (recipes[elf1Index] + recipes[elf2Index]).toString().map(Character::getNumericValue)
 
-            elf1Index = (elf1Index + recipies[elf1Index] + 1) % recipies.size
-            elf2Index = (elf2Index + recipies[elf2Index] + 1) % recipies.size
+            elf1Index = (elf1Index + recipes[elf1Index] + 1) % recipes.size
+            elf2Index = (elf2Index + recipes[elf2Index] + 1) % recipes.size
         }
 
-        return recipies.joinToString("").indexOf(searchedSubsequence)
+        return recipes.joinToString("").indexOf(searchedSubsequence)
     }
 }
 
